@@ -416,7 +416,7 @@ const SleepAssessment = ({ onBack }) => {
               Your <span className="text-accent">Sleep</span> Results
             </h1>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-12">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
               <motion.div
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
@@ -445,42 +445,9 @@ const SleepAssessment = ({ onBack }) => {
                 transition={{ delay: 0.3 }}
                 className="bg-bg-card border border-white/10 rounded-2xl p-6 text-center"
               >
-                <h3 className="text-[16px] font-bold text-white mb-2">Sleep Hygiene</h3>
-                <div className="text-[36px] font-black text-accent mb-2">{scores.hygiene}</div>
-                <p className="text-[12px] text-[#9ca3af]">Habits Score</p>
-              </motion.div>
-
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.4 }}
-                className="bg-bg-card border border-white/10 rounded-2xl p-6 text-center"
-              >
-                <h3 className="text-[16px] font-bold text-white mb-2">Stress Impact</h3>
-                <div className="text-[36px] font-black text-accent mb-2">{scores.stress}</div>
-                <p className="text-[12px] text-[#9ca3af]">Stress Score</p>
-              </motion.div>
-
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.5 }}
-                className="bg-bg-card border border-white/10 rounded-2xl p-6 text-center"
-              >
-                <h3 className="text-[16px] font-bold text-white mb-2">Daytime Fatigue</h3>
-                <div className="text-[36px] font-black text-accent mb-2">{scores.fatigue}</div>
-                <p className="text-[12px] text-[#9ca3af]">Fatigue Score</p>
-              </motion.div>
-
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.6 }}
-                className="bg-bg-card border border-white/10 rounded-2xl p-6 text-center"
-              >
-                <h3 className="text-[16px] font-bold text-white mb-2">Disorder Risk</h3>
+                <h3 className="text-[16px] font-bold text-white mb-2">Sleep Apnea Risk</h3>
                 <div className="text-[36px] font-black text-accent mb-2">{scores.disorderRisk}</div>
-                <p className="text-[12px] text-[#9ca3af]">Risk Score</p>
+                <p className="text-[12px] text-[#9ca3af]">Apnea Score</p>
               </motion.div>
             </div>
 

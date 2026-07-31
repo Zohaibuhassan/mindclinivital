@@ -1,4 +1,6 @@
-import React from 'react';
+import React, { useState } from 'react';
+import { db } from '../firebase';
+import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
 
 const contacts = [
   {
@@ -39,6 +41,31 @@ const contacts = [
 ];
 
 const Contact = () => {
+  const [formData, setFormData] = useState({ name: '', email: '', subject: '', message: '' });
+  const [status, setStatus] = useState('idle'); // idle, loading, success, error
+
+  const handleChange = (e) => {
+    setFormData({ ...formData, [e.target.id]: e.target.value });
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    if (!formData.name || !formData.email || !formData.message) return;
+    
+    setStatus('loading');
+    try {
+      await addDoc(collection(db, 'contact_messages'), {
+        ...formData,
+        createdAt: serverTimestamp()
+      });
+      setStatus('success');
+      setFormData({ name: '', email: '', subject: '', message: '' });
+    } catch (error) {
+      console.error('Error adding document: ', error);
+      setStatus('error');
+    }
+  };
+
   return (
     <section id="contact" className="relative bg-bg-primary overflow-hidden py-[70px] md:py-[100px]">
       <div className="absolute w-[500px] h-[500px] bg-[radial-gradient(circle,rgba(0,212,200,0.06)_0%,transparent_70%)] bottom-0 left-0 blur-[60px] pointer-events-none" />
@@ -70,30 +97,44 @@ const Contact = () => {
         {/* Contact form */}
         <div className="max-w-[720px] mx-auto bg-bg-card border border-white/10 rounded-[24px] p-7 px-5 md:p-12">
           <h3 className="text-[22px] font-bold mb-8 text-center">Send Us a Message</h3>
-          <form className="flex flex-col gap-5" onSubmit={(e) => e.preventDefault()}>
+          
+          {status === 'success' && (
+            <div className="mb-6 p-4 rounded-xl bg-[rgba(0,212,200,0.1)] border border-[rgba(0,212,200,0.2)] text-[#00d4c8] text-center text-[14px]">
+              Thank you! Your message has been sent successfully. We will get back to you soon.
+            </div>
+          )}
+          {status === 'error' && (
+            <div className="mb-6 p-4 rounded-xl bg-[rgba(255,59,48,0.1)] border border-[rgba(255,59,48,0.2)] text-[#ff453a] text-center text-[14px]">
+              An error occurred while sending your message. Please try again or email us directly.
+            </div>
+          )}
+
+          <form className="flex flex-col gap-5" onSubmit={handleSubmit}>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
               <div className="flex flex-col gap-2">
                 <label className="text-[13px] font-semibold text-[#9ca3af]" htmlFor="name">Full Name</label>
-                <input className="bg-bg-secondary border border-white/10 rounded-[10px] py-[13px] px-4 text-[14px] text-white font-sans outline-none transition-all duration-200 placeholder-[#6b7280] focus:border-accent focus:shadow-[0_0_0_3px_rgba(0,212,200,0.1)]" id="name" type="text" placeholder="John Doe" />
+                <input required value={formData.name} onChange={handleChange} className="bg-bg-secondary border border-white/10 rounded-[10px] py-[13px] px-4 text-[14px] text-white font-sans outline-none transition-all duration-200 placeholder-[#6b7280] focus:border-accent focus:shadow-[0_0_0_3px_rgba(0,212,200,0.1)]" id="name" type="text" placeholder="John Doe" />
               </div>
               <div className="flex flex-col gap-2">
                 <label className="text-[13px] font-semibold text-[#9ca3af]" htmlFor="email">Email Address</label>
-                <input className="bg-bg-secondary border border-white/10 rounded-[10px] py-[13px] px-4 text-[14px] text-white font-sans outline-none transition-all duration-200 placeholder-[#6b7280] focus:border-accent focus:shadow-[0_0_0_3px_rgba(0,212,200,0.1)]" id="email" type="email" placeholder="john@example.com" />
+                <input required value={formData.email} onChange={handleChange} className="bg-bg-secondary border border-white/10 rounded-[10px] py-[13px] px-4 text-[14px] text-white font-sans outline-none transition-all duration-200 placeholder-[#6b7280] focus:border-accent focus:shadow-[0_0_0_3px_rgba(0,212,200,0.1)]" id="email" type="email" placeholder="john@example.com" />
               </div>
             </div>
             <div className="flex flex-col gap-2">
               <label className="text-[13px] font-semibold text-[#9ca3af]" htmlFor="subject">Subject</label>
-              <input className="bg-bg-secondary border border-white/10 rounded-[10px] py-[13px] px-4 text-[14px] text-white font-sans outline-none transition-all duration-200 placeholder-[#6b7280] focus:border-accent focus:shadow-[0_0_0_3px_rgba(0,212,200,0.1)]" id="subject" type="text" placeholder="How can we help?" />
+              <input value={formData.subject} onChange={handleChange} className="bg-bg-secondary border border-white/10 rounded-[10px] py-[13px] px-4 text-[14px] text-white font-sans outline-none transition-all duration-200 placeholder-[#6b7280] focus:border-accent focus:shadow-[0_0_0_3px_rgba(0,212,200,0.1)]" id="subject" type="text" placeholder="How can we help?" />
             </div>
             <div className="flex flex-col gap-2">
               <label className="text-[13px] font-semibold text-[#9ca3af]" htmlFor="message">Message</label>
-              <textarea className="bg-bg-secondary border border-white/10 rounded-[10px] py-[13px] px-4 text-[14px] text-white font-sans outline-none transition-all duration-200 placeholder-[#6b7280] focus:border-accent focus:shadow-[0_0_0_3px_rgba(0,212,200,0.1)] resize-y min-h-[120px]" id="message" rows="5" placeholder="Tell us more about your needs..." />
+              <textarea required value={formData.message} onChange={handleChange} className="bg-bg-secondary border border-white/10 rounded-[10px] py-[13px] px-4 text-[14px] text-white font-sans outline-none transition-all duration-200 placeholder-[#6b7280] focus:border-accent focus:shadow-[0_0_0_3px_rgba(0,212,200,0.1)] resize-y min-h-[120px]" id="message" rows="5" placeholder="Tell us more about your needs..." />
             </div>
-            <button type="submit" className="bg-gradient-to-br from-accent to-accent-2 text-black text-[15px] font-bold py-3.5 px-8 rounded-lg font-sans w-full max-w-[200px] self-center flex items-center justify-center gap-2 mt-2 transition-all duration-300 tracking-wide hover:-translate-y-0.5 hover:shadow-[0_8px_25px_rgba(0,212,200,0.4)]">
-              Send Message
-              <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-                <path d="M2 8l10 0M9 4l4 4-4 4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-              </svg>
+            <button disabled={status === 'loading'} type="submit" className="bg-gradient-to-br from-accent to-accent-2 text-black text-[15px] font-bold py-3.5 px-8 rounded-lg font-sans w-full max-w-[200px] self-center flex items-center justify-center gap-2 mt-2 transition-all duration-300 tracking-wide hover:-translate-y-0.5 hover:shadow-[0_8px_25px_rgba(0,212,200,0.4)] disabled:opacity-70 disabled:cursor-not-allowed">
+              {status === 'loading' ? 'Sending...' : 'Send Message'}
+              {status !== 'loading' && (
+                <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+                  <path d="M2 8l10 0M9 4l4 4-4 4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                </svg>
+              )}
             </button>
           </form>
         </div>

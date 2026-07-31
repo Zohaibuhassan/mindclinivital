@@ -34,8 +34,8 @@ const problems = [
       </svg>
     ),
     number: '03',
-    title: 'Your AI Hygiene Gap',
-    description: 'Modern healthcare is reactive — we treat disease after it manifests. But 80% of chronic diseases are preventable with early detection and consistent lifestyle changes. The problem is that tracking health continuously and understanding what the data means has historically required expensive wearables, doctors, and lab tests. MindClinicVital makes proactive AI health hygiene as routine as brushing your teeth.',
+    title: 'Social Stigma',
+    description: 'Many individuals suffer in silence because of the social stigma associated with seeking help, especially for mental health and sleep disorders. Fear of judgment often prevents people from getting the early intervention they desperately need. MindClinicVital provides a completely private, judgment-free AI companion that allows you to assess your health confidentially from the comfort of your home, breaking down the barriers of stigma.',
   },
 ];
 
