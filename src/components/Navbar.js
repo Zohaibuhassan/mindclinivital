@@ -1,9 +1,14 @@
-import React, { useState, useEffect } from 'react';
-import { UserCircle } from 'lucide-react';
+import React, { useState, useEffect, useRef } from 'react';
+import { UserCircle, LogOut, User } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { auth } from '../firebase';
+import { signOut } from 'firebase/auth';
 
 const Navbar = () => {
   const [scrolled, setScrolled] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
+  const [profileOpen, setProfileOpen] = useState(false);
+  const profileRef = useRef(null);
 
   useEffect(() => {
     const handleScroll = () => setScrolled(window.scrollY > 20);
@@ -11,9 +16,30 @@ const Navbar = () => {
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
+  // Close profile dropdown if clicked outside
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (profileRef.current && !profileRef.current.contains(event.target)) {
+        setProfileOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
+  const handleSignOut = async () => {
+    try {
+      await signOut(auth);
+    } catch (error) {
+      console.error('Error signing out', error);
+    }
+  };
+
+  const user = auth.currentUser;
+
   return (
     <nav className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${scrolled ? 'bg-[#080c18]/98 shadow-[0_4px_24px_rgba(0,0,0,0.4)]' : 'bg-[#0a0e1e]/85 backdrop-blur-md border-b border-white/5 py-3.5'}`}>
-      <div className="container mx-auto px-6 flex items-center">
+      <div className="container mx-auto px-6 flex items-center relative">
 
         {/* Logo */}
         <a href="#home" className="flex items-center gap-2.5 no-underline shrink-0">
@@ -42,10 +68,49 @@ const Navbar = () => {
         </ul>
 
         {/* Right Actions */}
-        <div className="hidden lg:flex items-center gap-4 shrink-0 ml-auto">
-          <button className="flex items-center justify-center text-[#c9d1e3] transition-all duration-200 hover:text-[#00d4c8] hover:scale-105" aria-label="Account">
+        <div className="hidden lg:flex items-center gap-4 shrink-0 ml-auto relative" ref={profileRef}>
+          <button 
+            onClick={() => setProfileOpen(!profileOpen)}
+            className="flex items-center justify-center text-[#c9d1e3] transition-all duration-200 hover:text-[#00d4c8] hover:scale-105" 
+            aria-label="Account"
+          >
             <UserCircle className="w-8 h-8" strokeWidth={1.5} />
           </button>
+
+          {/* Account Dropdown */}
+          <AnimatePresence>
+            {profileOpen && (
+              <motion.div
+                initial={{ opacity: 0, y: 10, scale: 0.95 }}
+                animate={{ opacity: 1, y: 0, scale: 1 }}
+                exit={{ opacity: 0, y: 10, scale: 0.95 }}
+                transition={{ duration: 0.2 }}
+                className="absolute right-0 top-full mt-4 w-64 bg-[rgba(20,25,40,0.95)] backdrop-blur-xl border border-[rgba(255,255,255,0.1)] rounded-2xl p-4 shadow-2xl z-50 origin-top-right"
+              >
+                <div className="flex flex-col items-center pb-4 border-b border-[rgba(255,255,255,0.1)]">
+                  <div className="w-12 h-12 bg-gradient-to-tr from-[rgba(0,212,200,0.2)] to-[rgba(10,132,255,0.2)] rounded-full flex items-center justify-center mb-3">
+                    <User className="w-6 h-6 text-[#00d4c8]" />
+                  </div>
+                  <h3 className="text-white font-semibold text-[15px] truncate w-full text-center">
+                    {user?.displayName || 'Wellness User'}
+                  </h3>
+                  <p className="text-gray-400 text-[13px] truncate w-full text-center">
+                    {user?.email || 'user@example.com'}
+                  </p>
+                </div>
+
+                <div className="pt-2">
+                  <button 
+                    onClick={handleSignOut}
+                    className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-[14px] font-medium text-gray-300 hover:bg-[rgba(255,59,48,0.1)] hover:text-[#ff453a] transition-colors"
+                  >
+                    <LogOut className="w-4 h-4" />
+                    Sign Out
+                  </button>
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
         </div>
 
         {/* Hamburger */}

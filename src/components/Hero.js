@@ -51,8 +51,7 @@ const Hero = ({ onTryDemo }) => {
 
         {/* ── CTA buttons ──────────────── */}
         <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3.5 flex-wrap w-full">
-          <button onClick={onTryDemo} className="bg-gradient-to-br from-accent to-accent-2 text-black text-[14px] font-extrabold py-3 px-[30px] rounded-lg font-sans transition-all duration-250 tracking-wide hover:opacity-90 hover:-translate-y-[2px] hover:shadow-[0_8px_24px_rgba(0,212,200,0.4)] text-center">Try Mental AI</button>
-          <button className="bg-transparent text-white text-[14px] font-semibold py-[11px] px-7 border-[1.5px] border-white/25 rounded-lg font-sans transition-all duration-250 hover:border-white/50 hover:bg-white/5 hover:-translate-y-[2px] text-center">Get notified when we launch</button>
+          <a href="#capabilities" className="bg-gradient-to-br from-accent to-accent-2 text-black text-[14px] font-extrabold py-3 px-[30px] rounded-lg font-sans transition-all duration-250 tracking-wide hover:opacity-90 hover:-translate-y-[2px] hover:shadow-[0_8px_24px_rgba(0,212,200,0.4)] text-center inline-block">Try Our Services</a>
         </div>
 
       </div>
