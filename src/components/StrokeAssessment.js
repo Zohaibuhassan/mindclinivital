@@ -149,6 +149,7 @@ const StrokeAssessment = ({ onBack }) => {
   const [voiceEnabled, setVoiceEnabled] = useState(true);
   const [voicePaused, setVoicePaused] = useState(false);
   const [selectedVoice, setSelectedVoice] = useState(null);
+  const [inputValue, setInputValue] = useState('');
 
   // Load available voices
   useEffect(() => {
@@ -187,16 +188,11 @@ const StrokeAssessment = ({ onBack }) => {
   const handleAnswer = (value) => {
     const currentQ = strokeQuestions[currentQuestionIndex];
     
-    setAnswers(prev => ({
-      ...prev,
+    const newAnswers = {
+      ...answers,
       [currentQ.id]: value
-    }));
-
-    // Check for emergency symptoms
-    if (emergencySymptoms.includes(currentQ.id) && value === 1) {
-      setCurrentStep('emergency');
-      return;
-    }
+    };
+    setAnswers(newAnswers);
 
     if (currentQuestionIndex < strokeQuestions.length - 1) {
       setCurrentQuestionIndex(prev => prev + 1);
@@ -502,22 +498,68 @@ const StrokeAssessment = ({ onBack }) => {
           </AnimatePresence>
 
           {/* Answer Options */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            {options.map((option) => (
-              <motion.button
-                key={option.value}
-                whileHover={{ scale: 1.02 }}
-                whileTap={{ scale: 0.98 }}
-                onClick={() => handleAnswer(option.value)}
-                className="bg-bg-card border border-white/10 rounded-xl p-5 text-left hover:border-accent/50 hover:bg-white/5 transition-all duration-200"
+          {currentQ.type === 'height' || currentQ.type === 'weight' || currentQ.type === 'text' ? (
+            <div className="flex flex-col gap-4 max-w-md mx-auto">
+              {currentQ.type === 'text' ? (
+                <textarea
+                  value={inputValue}
+                  onChange={(e) => setInputValue(e.target.value)}
+                  placeholder="Type your answer here..."
+                  className="bg-bg-card border border-white/10 rounded-xl p-4 text-white focus:border-accent outline-none min-h-[120px]"
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' && !e.shiftKey && inputValue.trim() !== '') {
+                      e.preventDefault();
+                      handleAnswer(inputValue);
+                      setInputValue('');
+                    }
+                  }}
+                />
+              ) : (
+                <input
+                  type="number"
+                  value={inputValue}
+                  onChange={(e) => setInputValue(e.target.value)}
+                  placeholder={currentQ.type === 'height' ? "Height in cm" : "Weight in kg"}
+                  className="bg-bg-card border border-white/10 rounded-xl p-4 text-white focus:border-accent outline-none"
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' && inputValue.trim() !== '') {
+                      handleAnswer(Number(inputValue));
+                      setInputValue('');
+                    }
+                  }}
+                />
+              )}
+              <button
+                onClick={() => {
+                  if (inputValue.trim() !== '') {
+                    handleAnswer(currentQ.type === 'text' ? inputValue : Number(inputValue));
+                    setInputValue('');
+                  }
+                }}
+                disabled={inputValue.trim() === ''}
+                className="bg-gradient-to-br from-accent to-accent-2 text-black text-[16px] font-bold px-8 py-4 rounded-xl font-sans transition-all duration-300 hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                <div className="flex items-center gap-3">
-                  <span className="text-[24px]">{option.emoji}</span>
-                  <span className="text-[15px] text-white font-medium">{option.label}</span>
-                </div>
-              </motion.button>
-            ))}
-          </div>
+                Next
+              </button>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              {options.map((option) => (
+                <motion.button
+                  key={option.value}
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
+                  onClick={() => handleAnswer(option.value)}
+                  className="bg-bg-card border border-white/10 rounded-xl p-5 text-left hover:border-accent/50 hover:bg-white/5 transition-all duration-200"
+                >
+                  <div className="flex items-center gap-3">
+                    <span className="text-[24px]">{option.emoji}</span>
+                    <span className="text-[15px] text-white font-medium">{option.label}</span>
+                  </div>
+                </motion.button>
+              ))}
+            </div>
+          )}
         </div>
       </div>
     );
@@ -526,6 +568,7 @@ const StrokeAssessment = ({ onBack }) => {
   // Results Screen
   if (currentStep === 'results') {
     const scores = calculateScores();
+    const isEmergency = emergencySymptoms.some(id => answers[id] === 1);
     
     return (
       <div className="min-h-screen bg-bg-primary flex flex-col items-center justify-center pt-20 pb-12 px-6">
@@ -545,6 +588,28 @@ const StrokeAssessment = ({ onBack }) => {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6 }}
           >
+            {isEmergency && (
+              <div className="bg-red-500/10 border border-red-500/50 rounded-2xl p-6 mb-8 text-center">
+                <div className="w-16 h-16 rounded-full bg-red-500/20 flex items-center justify-center mx-auto mb-4">
+                  <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="text-red-400">
+                    <path d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 2.26-3L13.732 4c-.247-.825-1.32-.825-1.567 0L4.28 16c-.54.825.159 2 1.22 2z"/>
+                  </svg>
+                </div>
+                <h2 className="text-[24px] font-bold text-red-400 mb-2">🚨 Emergency Warning</h2>
+                <p className="text-[15px] text-white mb-6">
+                  You may be experiencing symptoms that require urgent medical attention. Please contact your local emergency services or go to the nearest emergency department immediately.
+                </p>
+                <a
+                  href="tel:911"
+                  className="inline-flex items-center gap-2 bg-red-500 text-white py-3 px-6 rounded-xl font-semibold hover:bg-red-600 transition-colors"
+                >
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                    <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-4.15-1.29 15.37 15.37 0 0 1-6.2-4.25 15.37 15.37 0 0 1-4.25-6.2A19.79 19.79 0 0 1 4 2.18 2 2 0 0 1 7.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 2.61 7.45 2 2 0 0 1 1.72 3z"/>
+                  </svg>
+                  Call Emergency (911)
+                </a>
+              </div>
+            )}
             <h1 className="text-[32px] font-bold text-center mb-12">
               Your <span className="text-accent">Stroke Risk</span> Results
             </h1>

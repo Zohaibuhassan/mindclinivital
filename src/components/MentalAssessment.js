@@ -128,16 +128,11 @@ const MentalAssessment = ({ onBack }) => {
     const currentQ = allQuestions[currentQuestionIndex];
     const answerKey = `${currentQ.assessment}_${currentQ.questionId}`;
     
-    setAnswers(prev => ({
-      ...prev,
+    const newAnswers = {
+      ...answers,
       [answerKey]: value
-    }));
-
-    // Check for emergency (PHQ-9 item 9)
-    if (currentQ.assessment === 'PHQ9' && currentQ.questionId === 9 && value > 0) {
-      setCurrentStep('emergency');
-      return;
-    }
+    };
+    setAnswers(newAnswers);
 
     // Move to next question
     if (currentQuestionIndex < totalQuestions - 1) {
@@ -445,6 +440,7 @@ const MentalAssessment = ({ onBack }) => {
   // Results Screen
   if (currentStep === 'results') {
     const scores = calculateScores();
+    const isEmergency = answers['PHQ9_9'] > 0;
     
     return (
       <div className="min-h-screen bg-bg-primary flex flex-col items-center justify-center pt-20 pb-12 px-6">
@@ -464,6 +460,28 @@ const MentalAssessment = ({ onBack }) => {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6 }}
           >
+            {isEmergency && (
+              <div className="bg-red-500/10 border border-red-500/50 rounded-2xl p-6 mb-8 text-center">
+                <div className="w-16 h-16 rounded-full bg-red-500/20 flex items-center justify-center mx-auto mb-4">
+                  <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="text-red-400">
+                    <path d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 2.26-3L13.732 4c-.247-.825-1.32-.825-1.567 0L4.28 16c-.54.825.159 2 1.22 2z"/>
+                  </svg>
+                </div>
+                <h2 className="text-[24px] font-bold text-red-400 mb-2">I'm concerned about your safety</h2>
+                <p className="text-[15px] text-white mb-6">
+                  It sounds like you may be having thoughts of self-harm. Please reach out for help immediately.
+                </p>
+                <a
+                  href="tel:988"
+                  className="inline-flex items-center gap-2 bg-red-500 text-white py-3 px-6 rounded-xl font-semibold hover:bg-red-600 transition-colors"
+                >
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                    <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-4.15-1.29 15.37 15.37 0 0 1-6.2-4.25 15.37 15.37 0 0 1-4.25-6.2A19.79 19.79 0 0 1 4 2.18 2 2 0 0 1 7.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 2.61 7.45 2 2 0 0 1 1.72 3z"/>
+                  </svg>
+                  Call Now (988)
+                </a>
+              </div>
+            )}
             <h1 className="text-[32px] font-bold text-center mb-12">
               Your <span className="text-accent">Mental Health</span> Results
             </h1>
