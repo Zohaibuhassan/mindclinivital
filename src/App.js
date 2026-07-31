@@ -9,6 +9,7 @@ import MentalAssessment from './components/MentalAssessment';
 import SleepAssessment from './components/SleepAssessment';
 import StrokeAssessment from './components/StrokeAssessment';
 import Auth from './components/Auth';
+import SplashScreen from './components/SplashScreen';
 import { onAuthStateChanged } from 'firebase/auth';
 import { auth } from './firebase';
 
@@ -16,6 +17,7 @@ function App() {
   const [currentView, setCurrentView] = useState('home');
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [isAuthLoading, setIsAuthLoading] = useState(true);
+  const [showSplash, setShowSplash] = useState(true);
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (user) => {
@@ -50,6 +52,10 @@ function App() {
     setCurrentView('home');
     window.scrollTo(0, 0);
   };
+
+  if (showSplash) {
+    return <SplashScreen onFinish={() => setShowSplash(false)} />;
+  }
 
   if (isAuthLoading) {
     return (
