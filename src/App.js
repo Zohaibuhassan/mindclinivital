@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Navbar from './components/Navbar';
 import Hero from './components/Hero';
 import Capabilities from './components/Capabilities';
@@ -9,10 +9,26 @@ import MentalAssessment from './components/MentalAssessment';
 import SleepAssessment from './components/SleepAssessment';
 import StrokeAssessment from './components/StrokeAssessment';
 import Auth from './components/Auth';
+import { onAuthStateChanged } from 'firebase/auth';
+import { auth } from './firebase';
 
 function App() {
   const [currentView, setCurrentView] = useState('home');
   const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [isAuthLoading, setIsAuthLoading] = useState(true);
+
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
+      if (user) {
+        setIsAuthenticated(true);
+      } else {
+        setIsAuthenticated(false);
+      }
+      setIsAuthLoading(false);
+    });
+
+    return () => unsubscribe();
+  }, []);
 
   // Helper to handle navigation
   const navigateToMentalAI = () => {
@@ -34,6 +50,14 @@ function App() {
     setCurrentView('home');
     window.scrollTo(0, 0);
   };
+
+  if (isAuthLoading) {
+    return (
+      <div className="min-h-screen bg-bg-primary flex items-center justify-center">
+        <div className="w-12 h-12 border-4 border-[rgba(0,212,200,0.2)] border-t-[#00d4c8] rounded-full animate-spin"></div>
+      </div>
+    );
+  }
 
   if (!isAuthenticated) {
     return <Auth onAuthSuccess={() => setIsAuthenticated(true)} />;

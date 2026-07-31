@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { UserCircle } from 'lucide-react';
 
 const Navbar = () => {
   const [scrolled, setScrolled] = useState(false);
@@ -41,27 +42,10 @@ const Navbar = () => {
         </ul>
 
         {/* Right Actions */}
-        <div className="hidden lg:flex items-center gap-2.5 shrink-0 ml-auto">
-          {/* Instagram */}
-          <a href="https://instagram.com" target="_blank" rel="noopener noreferrer" className="flex items-center justify-center w-8 h-8 text-[#9ca3af] rounded-md transition-all duration-200 hover:text-white hover:bg-white/10" aria-label="Instagram">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-              <rect x="2" y="2" width="20" height="20" rx="5" ry="5"/>
-              <circle cx="12" cy="12" r="4"/>
-              <circle cx="17.5" cy="6.5" r="0.5" fill="currentColor"/>
-            </svg>
-          </a>
-          {/* LinkedIn */}
-          <a href="https://linkedin.com" target="_blank" rel="noopener noreferrer" className="flex items-center justify-center w-8 h-8 text-[#9ca3af] rounded-md transition-all duration-200 hover:text-white hover:bg-white/10" aria-label="LinkedIn">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
-              <path d="M16 8a6 6 0 016 6v7h-4v-7a2 2 0 00-2-2 2 2 0 00-2 2v7h-4v-7a6 6 0 016-6zM2 9h4v12H2zM4 6a2 2 0 100-4 2 2 0 000 4z"/>
-            </svg>
-          </a>
-          {/* Language */}
-          <button className="bg-white/5 border border-white/10 text-[#c9d1e3] text-[12px] font-bold px-2.5 py-1.5 rounded-md font-sans tracking-wide transition-all duration-200 hover:bg-white/10 hover:text-white">EN</button>
-          {/* Sign In */}
-          <button className="bg-transparent border border-white/20 text-white text-[13px] font-semibold px-4.5 py-2 rounded-lg font-sans transition-all duration-200 hover:bg-white/5 hover:border-white/30">Sign In</button>
-          {/* Sign Up */}
-          <button className="bg-gradient-to-br from-accent to-accent-2 text-black text-[13px] font-bold px-5 py-2 rounded-lg font-sans tracking-wide transition-all duration-250 hover:opacity-90 hover:-translate-y-[1px] hover:shadow-[0_6px_20px_rgba(0,212,200,0.35)]">Sign Up</button>
+        <div className="hidden lg:flex items-center gap-4 shrink-0 ml-auto">
+          <button className="flex items-center justify-center text-[#c9d1e3] transition-all duration-200 hover:text-[#00d4c8] hover:scale-105" aria-label="Account">
+            <UserCircle className="w-8 h-8" strokeWidth={1.5} />
+          </button>
         </div>
 
         {/* Hamburger */}

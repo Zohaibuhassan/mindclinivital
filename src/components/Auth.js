@@ -1,14 +1,41 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Mail, Lock, User, ArrowRight, Activity } from 'lucide-react';
+import { Mail, Lock, User, ArrowRight, Activity, AlertCircle, Loader2 } from 'lucide-react';
+import { createUserWithEmailAndPassword, signInWithEmailAndPassword, updateProfile } from 'firebase/auth';
+import { auth } from '../firebase';
 
 const Auth = ({ onAuthSuccess }) => {
   const [isLogin, setIsLogin] = useState(true);
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [name, setName] = useState('');
+  const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    // Simulate authentication process
-    onAuthSuccess();
+    setError('');
+    setLoading(true);
+
+    try {
+      if (isLogin) {
+        await signInWithEmailAndPassword(auth, email, password);
+      } else {
+        const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+        if (name) {
+          await updateProfile(userCredential.user, { displayName: name });
+        }
+      }
+      onAuthSuccess();
+    } catch (err) {
+      let errorMessage = "An error occurred. Please try again.";
+      if (err.code === 'auth/invalid-credential') errorMessage = 'Invalid email or password.';
+      if (err.code === 'auth/email-already-in-use') errorMessage = 'An account with this email already exists.';
+      if (err.code === 'auth/weak-password') errorMessage = 'Password should be at least 6 characters.';
+      setError(errorMessage);
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -42,10 +69,26 @@ const Auth = ({ onAuthSuccess }) => {
           <h2 className="text-3xl font-bold text-center mb-2 tracking-tight">
             {isLogin ? 'Welcome Back' : 'Create Account'}
           </h2>
-          <p className="text-gray-400 text-center mb-8 text-sm">
+          <p className="text-gray-400 text-center mb-6 text-sm">
             {isLogin ? 'Enter your details to access your dashboard.' : 'Sign up to start your wellness journey.'}
           </p>
         </motion.div>
+
+        <AnimatePresence>
+          {error && (
+            <motion.div
+              initial={{ opacity: 0, height: 0, marginBottom: 0 }}
+              animate={{ opacity: 1, height: 'auto', marginBottom: 24 }}
+              exit={{ opacity: 0, height: 0, marginBottom: 0 }}
+              className="overflow-hidden"
+            >
+              <div className="p-4 rounded-xl bg-[rgba(255,59,48,0.1)] border border-[rgba(255,59,48,0.2)] flex items-center gap-3 text-[#ff453a]">
+                <AlertCircle className="w-5 h-5 flex-shrink-0" />
+                <p className="text-sm font-medium">{error}</p>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <AnimatePresence mode="wait">
@@ -63,6 +106,8 @@ const Auth = ({ onAuthSuccess }) => {
                 <input 
                   type="text" 
                   placeholder="Full Name" 
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
                   required={!isLogin}
                   className="w-full pl-12 pr-4 py-3.5 bg-[rgba(0,0,0,0.2)] border border-[rgba(255,255,255,0.08)] rounded-xl focus:outline-none focus:border-[#00d4c8] focus:bg-[rgba(255,255,255,0.05)] transition-all text-white placeholder-gray-500"
                 />
@@ -82,6 +127,8 @@ const Auth = ({ onAuthSuccess }) => {
             <input 
               type="email" 
               placeholder="Email Address" 
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
               required
               className="w-full pl-12 pr-4 py-3.5 bg-[rgba(0,0,0,0.2)] border border-[rgba(255,255,255,0.08)] rounded-xl focus:outline-none focus:border-[#00d4c8] focus:bg-[rgba(255,255,255,0.05)] transition-all text-white placeholder-gray-500"
             />
@@ -99,6 +146,8 @@ const Auth = ({ onAuthSuccess }) => {
             <input 
               type="password" 
               placeholder="Password" 
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
               required
               className="w-full pl-12 pr-4 py-3.5 bg-[rgba(0,0,0,0.2)] border border-[rgba(255,255,255,0.08)] rounded-xl focus:outline-none focus:border-[#00d4c8] focus:bg-[rgba(255,255,255,0.05)] transition-all text-white placeholder-gray-500"
             />
@@ -126,10 +175,17 @@ const Auth = ({ onAuthSuccess }) => {
               whileHover={{ scale: 1.01, boxShadow: "0 10px 25px -5px rgba(0,212,200,0.3)" }}
               whileTap={{ scale: 0.98 }}
               type="submit" 
-              className="w-full py-4 mt-4 bg-gradient-to-r from-[#00d4c8] to-[#0a84ff] rounded-xl font-semibold text-white shadow-lg flex items-center justify-center gap-2 group transition-all"
+              disabled={loading}
+              className="w-full py-4 mt-4 bg-gradient-to-r from-[#00d4c8] to-[#0a84ff] rounded-xl font-semibold text-white shadow-lg flex items-center justify-center gap-2 group transition-all disabled:opacity-70 disabled:cursor-not-allowed"
             >
-              {isLogin ? 'Sign In' : 'Create Account'}
-              <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+              {loading ? (
+                <Loader2 className="w-5 h-5 animate-spin" />
+              ) : (
+                <>
+                  {isLogin ? 'Sign In' : 'Create Account'}
+                  <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+                </>
+              )}
             </motion.button>
           </motion.div>
         </form>
@@ -143,7 +199,10 @@ const Auth = ({ onAuthSuccess }) => {
           {isLogin ? "Don't have an account? " : "Already have an account? "}
           <button 
             type="button" 
-            onClick={() => setIsLogin(!isLogin)}
+            onClick={() => {
+              setIsLogin(!isLogin);
+              setError('');
+            }}
             className="text-[#00d4c8] hover:text-white font-medium transition-colors"
           >
             {isLogin ? 'Sign up' : 'Sign in'}
