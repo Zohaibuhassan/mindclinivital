@@ -41,17 +41,6 @@ const assessmentData = {
       { id: 4, text: 'In the last month, how often have you felt that things were going your way?' },
       { id: 5, text: 'In the last month, how often have you felt difficulties were piling up so high that you could not overcome them?' },
     ]
-  },
-  WHO5: {
-    name: 'Well-being',
-    description: 'Well-being Assessment',
-    questions: [
-      { id: 1, text: 'I have felt cheerful and in good spirits' },
-      { id: 2, text: 'I have felt calm and relaxed' },
-      { id: 3, text: 'I have felt active and vigorous' },
-      { id: 4, text: 'I woke up feeling fresh and rested' },
-      { id: 5, text: 'My daily life has been filled with interesting things' },
-    ]
   }
 };
 
@@ -106,7 +95,7 @@ const MentalAssessment = ({ onBack }) => {
 
   // Get all questions in order
   const getAllQuestions = () => {
-    const order = ['PHQ9', 'GAD7', 'PSS10', 'WHO5'];
+    const order = ['PHQ9', 'GAD7', 'PSS10'];
     const allQuestions = [];
     order.forEach(key => {
       assessmentData[key].questions.forEach((q) => {
@@ -154,11 +143,7 @@ const MentalAssessment = ({ onBack }) => {
         total += answers[answerKey] || 0;
       });
       
-      if (key === 'WHO5') {
-        scores[key] = Math.round((total / 25) * 100); // WHO-5 is inverted (0-100 scale)
-      } else {
-        scores[key] = total;
-      }
+      scores[key] = total;
     });
     
     return scores;
@@ -166,12 +151,6 @@ const MentalAssessment = ({ onBack }) => {
 
   // Get severity level
   const getSeverity = (score, type) => {
-    if (type === 'WHO5') {
-      if (score >= 50) return { level: 'Good', color: 'text-green-400' };
-      if (score >= 25) return { level: 'Moderate', color: 'text-yellow-400' };
-      return { level: 'Low', color: 'text-red-400' };
-    }
-    
     if (type === 'PHQ9') {
       if (score <= 4) return { level: 'Minimal', color: 'text-green-400' };
       if (score <= 9) return { level: 'Mild', color: 'text-yellow-400' };
@@ -288,13 +267,13 @@ const MentalAssessment = ({ onBack }) => {
 
             <div className="grid gap-4 max-w-md mx-auto">
               <a
-                href="tel:988"
+                href="tel:03705494955"
                 className="bg-red-500 text-white py-4 px-6 rounded-xl font-semibold flex items-center justify-center gap-2 hover:bg-red-600 transition-colors"
               >
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                   <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-4.15-1.29 15.37 15.37 0 0 1-6.2-4.25 15.37 15.37 0 0 1-4.25-6.2A19.79 19.79 0 0 1 4 2.18 2 2 0 0 1 7.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 2.61 7.45 2 2 0 0 1 1.72 3z"/>
                 </svg>
-                Call Now (988)
+                Call Now (03705494955)
               </a>
               
               <button
@@ -472,13 +451,13 @@ const MentalAssessment = ({ onBack }) => {
                   It sounds like you may be having thoughts of self-harm. Please reach out for help immediately.
                 </p>
                 <a
-                  href="tel:988"
+                  href="tel:03705494955"
                   className="inline-flex items-center gap-2 bg-red-500 text-white py-3 px-6 rounded-xl font-semibold hover:bg-red-600 transition-colors"
                 >
                   <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                     <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-4.15-1.29 15.37 15.37 0 0 1-6.2-4.25 15.37 15.37 0 0 1-4.25-6.2A19.79 19.79 0 0 1 4 2.18 2 2 0 0 1 7.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 2.61 7.45 2 2 0 0 1 1.72 3z"/>
                   </svg>
-                  Call Now (988)
+                  Call Now (03705494955)
                 </a>
               </div>
             )}
@@ -486,7 +465,7 @@ const MentalAssessment = ({ onBack }) => {
               Your <span className="text-accent">Mental Health</span> Results
             </h1>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-12">
               {Object.entries(assessmentData).map(([key, data]) => {
                 const severity = getSeverity(scores[key], key);
                 return (
@@ -509,7 +488,7 @@ const MentalAssessment = ({ onBack }) => {
             <div className="bg-bg-card border border-white/10 rounded-2xl p-8 mb-8">
               <h3 className="text-[18px] font-bold text-white mb-4">AI Summary</h3>
               <p className="text-[15px] text-[#9ca3af] leading-relaxed">
-                You reported {getSeverity(scores.PHQ9, 'PHQ9').level.toLowerCase()} symptoms of depression with {getSeverity(scores.GAD7, 'GAD7').level.toLowerCase()} anxiety and {getSeverity(scores.PSS10, 'PSS10').level.toLowerCase()} stress levels. Your wellbeing score suggests that self-care strategies and professional consultation may be beneficial.
+                You reported {getSeverity(scores.PHQ9, 'PHQ9').level.toLowerCase()} symptoms of depression with {getSeverity(scores.GAD7, 'GAD7').level.toLowerCase()} anxiety and {getSeverity(scores.PSS10, 'PSS10').level.toLowerCase()} stress levels. We recommend considering self-care strategies and professional consultation if these feelings persist.
               </p>
             </div>
 

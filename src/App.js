@@ -35,7 +35,7 @@ function App() {
 
   return (
     <div className="min-h-screen bg-bg-primary text-white font-sans overflow-x-hidden selection:bg-[rgba(0,212,200,0.3)] selection:text-white">
-      <Navbar />
+      {currentView === 'home' && <Navbar />}
       {currentView === 'home' ? (
         <>
           <Hero onTryDemo={navigateToMentalAI} />
@@ -50,7 +50,7 @@ function App() {
       ) : (
         <StrokeAssessment onBack={navigateToHome} />
       )}
-      <Footer />
+      {currentView === 'home' && <Footer />}
     </div>
   );
 }
